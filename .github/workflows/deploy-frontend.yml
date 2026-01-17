@@ -32,9 +32,10 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ubuntu
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "dist/**"
+          source: "dist/*"
           target: "/home/ubuntu/pdf-toolkit/frontend/dist"
           overwrite: true
+
 
       - name: Check uploaded files on server
         uses: appleboy/ssh-action@v0.1.7
