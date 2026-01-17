@@ -4,7 +4,8 @@ on:
   push:
     branches: ["main"]
     paths:
-      - "frontend/**"
+      - "public/**"
+      - ".github/workflows/deploy-frontend.yml"
 
 jobs:
   deploy:
@@ -20,7 +21,7 @@ jobs:
           node-version: 18
 
       - name: Install and Build Frontend
-        working-directory: frontend
+        working-directory: public
         run: |
           npm install
           npm run build
@@ -31,7 +32,7 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ubuntu
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "frontend/dist/*"
+          source: "public/dist/*"
           target: "/home/ubuntu/pdf-toolkit/frontend/dist"
 
       - name: Restart Nginx
