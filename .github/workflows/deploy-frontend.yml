@@ -26,16 +26,30 @@ jobs:
           echo "==== dist assets ===="
           ls -la dist/assets || true
 
-      - name: Upload dist to Server
+      # Upload dist to a temp folder (safe, no sudo needed)
+      - name: Upload dist to Server temp folder
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ubuntu
           key: ${{ secrets.SERVER_SSH_KEY }}
           source: "dist/*"
-          target: "/home/ubuntu/pdf-toolkit/frontend/dist"
+          target: "/home/ubuntu/tmp-dist"
           overwrite: true
 
+      # Move temp dist to /var/www/pdf-toolkit/frontend/dist using sudo
+      - name: Move dist to /var/www and restart nginx
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ubuntu
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            sudo mkdir -p /var/www/pdf-toolkit/frontend/dist
+            sudo rm -rf /var/www/pdf-toolkit/frontend/dist/*
+            sudo cp -r /home/ubuntu/tmp-dist/* /var/www/pdf-toolkit/frontend/dist/
+            sudo rm -rf /home/ubuntu/tmp-dist
+            sudo systemctl restart nginx
 
       - name: Check uploaded files on server
         uses: appleboy/ssh-action@v0.1.7
@@ -45,4 +59,4 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             echo "==== server dist content ===="
-            ls -la /home/ubuntu/pdf-toolkit/frontend/dist
+            ls -la /var/www/pdf-toolkit/frontend/dist
